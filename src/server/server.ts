@@ -25,6 +25,9 @@ export async function createServer({
 
   const server = http.createServer(async (req, res) => {
     const pathname = url.parse(req.url!).pathname!
+
+    console.log('pathname', pathname)
+
     if (pathname === '/__hmrClient') {
       return sendJS(res, hmrClientCode)
     } else if (pathname.startsWith('/__modules/')) {
@@ -32,6 +35,10 @@ export async function createServer({
     } else if (pathname.endsWith('.vue')) {
       return vueMiddleware(cwd, req, res)
     } else if (pathname.endsWith('.js')) {
+      // 这里先监听 .js结尾的文件例如test 的 main.js文件
+      // 先读main.js 文件 然后将 import xx from 'xxx' 的语法提出来转换为 import xxx from "/__modules/xxx"格式 并发送给前端
+      // 前端拿到js文件后这样浏览器会再次请求加载 __modules/xxx
+      // 然后会再次走到 server 这个链路来
       const filename = path.join(cwd, pathname.slice(1))
       try {
         const content = await fs.readFile(filename, 'utf-8')
@@ -45,6 +52,7 @@ export async function createServer({
       }
     }
 
+    // 设置静态资源，localhost:PORT 直接打开index.html 文件
     serve(req, res, {
       public: cwd ? path.relative(process.cwd(), cwd) : '/',
       rewrites: [{ source: '**', destination: '/index.html' }]

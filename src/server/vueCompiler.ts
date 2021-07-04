@@ -134,7 +134,8 @@ function compileSFCTemplate(
     compilerOptions: {
       scopeId: scoped ? `data-v-${hash(pathname)}` : null,
       runtimeModuleName: '/__modules/vue'
-    }
+    },
+    id: ''
   })
 
   if (errors) {
