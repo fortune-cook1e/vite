@@ -8,12 +8,14 @@ const socket = new WebSocket(`ws://${location.host}`)
 // Listen for messages
 socket.addEventListener('message', ({ data }) => {
   const { type, path, id, index } = JSON.parse(data)
+  console.log({ type, path })
   switch (type) {
     case 'connected':
       console.log(`[vite] connected.`)
       break
     case 'reload':
       import(`${path}?t=${Date.now()}`).then((m) => {
+        console.log({ m, __VUE_HMR_RUNTIME__ })
         __VUE_HMR_RUNTIME__.reload(path, m.default)
         console.log(`[vite] ${path} reloaded.`)
       })
